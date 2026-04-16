@@ -7,6 +7,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
   { label: 'Projects', icon: 'folder', path: '/dashboard/projects' },
   { label: 'Tasks', icon: 'list', path: '/dashboard/tasks' },
   { label: 'Team', icon: 'people', path: '/dashboard/team' },
+  { label: 'Investors', icon: 'list', path: '/dashboard/investors' },
   { label: 'Settings', icon: 'settings', path: '/dashboard/settings' },
 ];
 

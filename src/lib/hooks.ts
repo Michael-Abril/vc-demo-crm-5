@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { usePrivy } from '@varity-labs/ui-kit';
-import { projects, tasks, teamMembers, userSettings } from './database';
-import type { Project, Task, TeamMember, UserSettings } from '../types';
+import { projects, tasks, teamMembers, userSettings, investors} from './database';
+import type { Project, Task, TeamMember, UserSettings, Investor} from '../types';
 
 export function useCurrentUser() {
   const { user, authenticated, logout } = usePrivy();
@@ -321,4 +321,61 @@ export function useUserSettings() {
   };
 
   return { settings, loading, error, update, refresh };
+}
+
+export function useInvestors(): UseCollectionReturn<Investor> {
+  const [data, setData] = useState<Investor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await investors().get();
+      setData(result as Investor[]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const create = async (input: Omit<Investor, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const optimistic: Investor = { ...input, id: crypto.randomUUID(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as Investor;
+    setData(prev => [optimistic, ...prev]);
+    try {
+      await investors().add({ ...input, createdAt: optimistic.createdAt });
+      await refresh();
+    } catch (err) {
+      setData(prev => prev.filter(p => p.id !== optimistic.id));
+      throw err;
+    }
+  };
+
+  const update = async (id: string, updates: Partial<Investor>) => {
+    const original = data.find(p => p.id === id);
+    setData(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+    try {
+      await investors().update(id, updates);
+    } catch (err) {
+      if (original) setData(prev => prev.map(p => p.id === id ? original : p));
+      throw err;
+    }
+  };
+
+  const remove = async (id: string) => {
+    const original = data.find(p => p.id === id);
+    setData(prev => prev.filter(p => p.id !== id));
+    try {
+      await investors().delete(id);
+    } catch (err) {
+      if (original) setData(prev => [...prev, original]);
+      throw err;
+    }
+  };
+
+  return { data, loading, error, create, update, remove, refresh };
 }

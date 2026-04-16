@@ -9,6 +9,11 @@
   },
   "database": {
     "provider": "varity",
-    "collections": ["projects", "tasks", "team_members"]
+    "collections": [
+      "projects",
+      "tasks",
+      "team_members",
+      "investors"
+    ]
   }
 }

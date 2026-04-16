@@ -50,3 +50,15 @@ export interface UserSettings {
   // Timestamps
   updated_at: string;
 }
+
+export interface Investor {
+  id: string;
+  name: string;
+  firm: string;
+  email: string;
+  investmentAmount: number;
+  stage: string;
+  lastContact: string;
+  createdAt: string;
+  updatedAt: string;
+}
